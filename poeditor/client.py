@@ -360,9 +360,19 @@ class POEditorAPI(object):
             raise POEditorArgsException(
                 u'content_type: file format {}'.format(self.FILE_TYPES))
 
-        if filters and filters not in self.FILTER_BY:
-            raise POEditorArgsException(
-                u"filters - filter results by {}".format(self.FILTER_BY))
+        if filters:
+            if not isinstance(filters, (str, list, tuple)):
+                raise POEditorArgsException(
+                    u'value of argument "filters" must be instance of str, list or tuple')
+
+            filters_set = {filters} if type(filters) is str else set(filters)
+
+            if filters_set & set(self.FILTER_BY) != filters_set:
+                raise POEditorArgsException(
+                    u'value of argument "filters" must be in {}'.format(self.FILTER_BY))
+
+        if type(filters) is not str:
+            filters = json.dumps(filters)
 
         data = self._run(
             action="export",
